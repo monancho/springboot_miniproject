@@ -1,0 +1,269 @@
+<html layout:decorate="~{layout}">
+	<div class="container my-3" layout:fragment="content">
+
+<!-- 필요 리소스 (head에) -->
+<!--
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+-->
+
+<!-- 필요 스크립트 (body 끝에) -->
+<!--
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+-->
+
+<div class="container my-4">
+  <!-- 질문 카드 -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+          <!-- (선택) 가벼운 라벨, 원하면 제거 -->
+          <span class="badge rounded-pill border text-secondary small me-2">글</span>
+          <h2 class="h5 d-inline" th:text="${question.subject}">제목</h2>
+        </div>
+        <a th:id="|question_${question.id}|"></a>
+      </div>
+
+      <div class="mt-3 card-text" style="white-space: pre-line;" th:text="${question.content}">콘텐츠</div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="small text-muted">
+          <div th:if="${question.author != null}" th:text="${question.author.username}">글쓴이</div>
+          <div th:text="${#temporals.format(question.createdate, 'yyyy-MM-dd HH:mm')}">등록일</div>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+          <div th:if="${question.modifyDate != null}" class="small text-muted text-end me-2">
+            <div>modified at</div>
+            <div th:text="${#temporals.format(question.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+          </div>
+
+          <!-- 추천 -->
+          <a href="javascript:void(0);" th:data-uri="@{|/question/vote/${question.id}|}"
+             class="recommend btn btn-sm btn-outline-secondary d-flex align-items-center"
+             sec:authorize="isAuthenticated()" aria-label="추천">
+            <i class="bi bi-hand-thumbs-up"></i>
+            <span class="ms-1">추천</span>
+            <span class="badge rounded-pill bg-transparent border text-secondary ms-2" th:text="${#lists.size(question.voter)}"></span>
+          </a>
+
+          <!-- 비추천 -->
+          <a href="javascript:void(0);" th:data-uri="@{|/question/disvote/${question.id}|}"
+             class="disrecommend btn btn-sm btn-outline-secondary d-flex align-items-center"
+             sec:authorize="isAuthenticated()" aria-label="비추천">
+            <i class="bi bi-hand-thumbs-down"></i>
+            <span class="ms-1">비추천</span>
+            <span class="badge rounded-pill bg-transparent border text-secondary ms-2" th:text="${#lists.size(question.disvoter)}"></span>
+          </a>
+
+          <!-- 수정 -->
+          <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary d-flex align-items-center"
+             sec:authorize="isAuthenticated()" th:if="${question.author != null and question.author.username == #authentication.getPrincipal().getUsername()}"
+             aria-label="수정">
+            <i class="bi bi-pencil"></i>
+            <span class="ms-1">수정</span>
+          </a>
+
+          <!-- 삭제 -->
+          <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
+             class="delete btn btn-sm btn-outline-danger d-flex align-items-center"
+             sec:authorize="isAuthenticated()" th:if="${question.author != null and question.author.username == #authentication.getPrincipal().getUsername()}"
+             aria-label="삭제">
+            <i class="bi bi-trash"></i>
+            <span class="ms-1">삭제</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 답변 헤더 -->
+  <h5 class="mt-4 mb-3"><span th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다|">답변 갯수</span></h5>
+
+  <!-- 답변 반복 (답글 없음) -->
+  <div th:each="answer : ${question.answerList}">
+    <div class="card border-0 shadow-sm rounded-3 mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <span class="badge rounded-pill border text-primary small me-2">답변</span>
+          </div>
+          <div class="small text-muted text-end">
+            <div th:if="${answer.author != null}" th:text="${answer.author.username}">작성자</div>
+            <div th:text="${#temporals.format(answer.createdate, 'yyyy-MM-dd HH:mm')}">작성시간</div>
+          </div>
+        </div>
+
+        <div class="mt-3 card-text" style="white-space: pre-line;" th:text="${answer.content}">답변 내용</div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="d-flex gap-2">
+            <!-- 답변 추천 -->
+            <a href="javascript:void(0);" th:data-uri="@{|/answer/vote/${answer.id}|}" class="recommend btn btn-sm btn-outline-primary d-flex align-items-center"
+               sec:authorize="isAuthenticated()" aria-label="답변 추천">
+              <i class="bi bi-hand-thumbs-up"></i>
+              <span class="ms-1">추천</span>
+              <span class="badge rounded-pill bg-transparent border text-primary ms-2" th:text="${#lists.size(answer.voter)}"></span>
+            </a>
+
+            <!-- 답변 비추천 -->
+            <a href="javascript:void(0);" th:data-uri="@{|/answer/disvote/${answer.id}|}" class="disrecommend btn btn-sm btn-outline-secondary d-flex align-items-center"
+               sec:authorize="isAuthenticated()" aria-label="답변 비추천">
+              <i class="bi bi-hand-thumbs-down"></i>
+              <span class="ms-1">비추천</span>
+              <span class="badge rounded-pill bg-transparent border text-secondary ms-2" th:text="${#lists.size(answer.disvoter)}"></span>
+            </a>
+
+            <!-- 답변 수정 -->
+            <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary d-flex align-items-center"
+               sec:authorize="isAuthenticated()" th:if="${answer.author != null and answer.author.username == #authentication.getPrincipal().getUsername()}"
+               aria-label="답변 수정">
+              <i class="bi bi-pencil"></i>
+              <span class="ms-1">수정</span>
+            </a>
+
+            <!-- 답변 삭제 -->
+            <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}" class="delete btn btn-sm btn-outline-danger d-flex align-items-center"
+               sec:authorize="isAuthenticated()" th:if="${answer.author != null and answer.author.username == #authentication.getPrincipal().getUsername()}"
+               aria-label="답변 삭제">
+              <i class="bi bi-trash"></i>
+              <span class="ms-1">삭제</span>
+            </a>
+          </div>
+
+          <div th:if="${answer.modifyDate != null}" class="small text-muted">modified: <span th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 답변 작성폼 -->
+  <form th:action="@{|/answer/create/${question.id}|}"
+      th:object="${answerForm}"
+      method="post"
+      class="my-4 p-3 bg-light rounded-3"
+      onsubmit="return validateNotBlank(this);">
+
+  <!-- form_errors(fragment) — 폼 바로 안에 위치 -->
+  <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+
+  <!-- 익명: disabled, name 생성하지 않음 -->
+  <textarea th:if="${#authentication == null or #authentication.principal == null}"
+            class="form-control mb-2"
+            rows="5"
+            placeholder="로그인 후 답변하실 수 있습니다."
+            disabled></textarea>
+
+  <!-- 인증된 사용자만 전송 가능한 단일 textarea -->
+  <textarea th:unless="${#authentication == null or #authentication.principal == null}"
+            th:field="*{content}"
+            class="form-control mb-2"
+            rows="5"
+            placeholder="답변 내용을 입력하세요."
+            required
+            pattern=".*\\S.*"
+            title="공백만 입력할 수 없습니다."></textarea>
+
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-primary d-flex align-items-center" aria-label="답변 등록">
+      <i class="bi bi-check2-circle"></i><span class="ms-2">답변등록</span>
+    </button>
+  </div>
+</form>
+
+
+  <!-- 댓글 헤더 -->
+  <h5 class="mt-4 mb-3"><span th:text="|${#lists.size(question.commentList)}개의 댓글이 있습니다|">댓글 갯수</span></h5>
+
+  <!-- 댓글 반복 -->
+  <div th:each="comment : ${question.commentList}" class="ms-3 mb-2">
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <span class="badge rounded-pill border text-secondary small me-2">댓글</span>
+          <div class="small text-muted text-end">
+            <div th:if="${comment.author != null}" th:text="${comment.author.username}">작성자</div>
+            <div th:text="${#temporals.format(comment.createdate, 'yyyy-MM-dd HH:mm')}">작성시간</div>
+          </div>
+        </div>
+
+        <div class="mt-2 card-text" style="white-space: pre-line;" th:text="${comment.content}">댓글 내용</div>
+
+        <div class="d-flex justify-content-end mt-2">
+          <a href="javascript:void(0);" th:data-uri="@{|/comment/delete/${comment.id}|}" class="delete btn btn-sm btn-outline-danger d-flex align-items-center"
+             sec:authorize="isAuthenticated()" th:if="${comment.author != null and comment.author.username == #authentication.getPrincipal().getUsername()}"
+             aria-label="댓글 삭제">
+            <i class="bi bi-trash"></i>
+            <span class="ms-1">삭제</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 댓글 작성폼 -->
+  <form th:action="@{|/comment/create/${question.id}|}"
+      th:object="${commentForm}"
+      method="post"
+      class="my-3 p-3 bg-white rounded-3 border-top"
+      onsubmit="return validateNotBlank(this);">
+
+  <!-- form errors 프래그먼트 (폼 바로 안에) -->
+  <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+
+  <!-- 익명 사용자: disabled, th:field 제거 (name 생성 방지) -->
+  <textarea th:if="${#authentication == null or #authentication.principal == null}"
+            class="form-control mb-2"
+            rows="4"
+            placeholder="로그인 후 댓글을 남길 수 있습니다."
+            disabled></textarea>
+
+  <!-- 인증 사용자: 실제 전송 필드 (단 한 개만 렌더) -->
+  <textarea th:unless="${#authentication == null or #authentication.principal == null}"
+            th:field="*{content}"
+            class="form-control mb-2"
+            rows="4"
+            placeholder="댓글을 입력하세요."
+          	required
+            pattern=".*\\S.*"
+            title="공백만 입력할 수 없습니다."></textarea>
+
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-secondary d-flex align-items-center" aria-label="댓글 등록">
+      <i class="bi bi-chat-dots"></i><span class="ms-2">댓글등록</span>
+    </button>
+  </div>
+</form>
+
+</div>
+
+
+	<!-- 자바 스크립트 시작 -->
+	<script  layout:fragment="script" type="text/javascript">
+		const delete_elements = document.getElementsByClassName("delete");
+		   Array.from(delete_elements).forEach(function (element) {
+		      element.addEventListener('click', function () {
+		         if (confirm("정말로 삭제하시겠습니까?")) {
+		            location.href = this.dataset.uri;
+		         };
+		      });
+		   });
+		const recommend_elements = document.getElementsByClassName("recommend");
+		   Array.from(recommend_elements).forEach(function (element) {
+		      element.addEventListener('click', function () {
+		         if (confirm("정말로 추천하시겠습니까?")) {
+		            location.href = this.dataset.uri;
+		         };
+		      });
+		   });
+		const disrecommend_elements = document.getElementsByClassName("disrecommend");
+		   Array.from(disrecommend_elements).forEach(function (element) {
+		      element.addEventListener('click', function () {
+		         if (confirm("정말로 비추천하시겠습니까?")) {
+		            location.href = this.dataset.uri;
+		         };
+		      });
+		   });
+	</script>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>monancho QA-Board!</title>
+
+  <!-- Bootstrap (로컬을 사용중이면 그대로 두고, 없을 경우 CDN으로 대체 가능) -->
+  <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+  <!-- Bootstrap Icons (최신 CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <!-- 사용자 스타일 (site-wide) -->
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}">
+</head>
+<body class="bg-light text-dark">
+
+  <!-- 네비게이션바 (밝고 부드러운 그림자) -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-0">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <i class="bi bi-chat-left-text-fill fs-4 text-primary" aria-hidden="true"></i>
+        <span class="fw-bold">monancho QA Board</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+              aria-controls="navbarMain" aria-expanded="false" aria-label="메뉴 토글">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" th:href="@{/question/list}">전체게시판</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/question/list?type=free}">자유게시판</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/question/list?type=QA}">질문게시판</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/question/create?type=time}">방문예약</a></li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item me-2">
+            <a class="nav-link px-2" sec:authorize="isAnonymous()" th:href="@{/user/login}">로그인</a>
+            <a class="nav-link px-2" sec:authorize="isAuthenticated()" th:href="@{/user/logout}">로그아웃</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" sec:authorize="isAnonymous()" th:href="@{/user/signup}">회원가입</a>
+          </li>
+          <li class="nav-item ms-3">
+            <a class="nav-link small text-muted" sec:authorize="isAuthenticated()"
+               th:text="|마이페이지: ${#authentication.getPrincipal().getUsername()}|"
+               th:href="@{/user/page}"></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 메인 컨테이너: 각 페이지의 내용이 이곳에 들어감 -->
+  <main class="container py-4">
+    <th:block layout:fragment="content"></th:block>
+  </main>
+
+  <!-- (선택) 푸터 -->
+  <footer class="mt-auto py-3">
+    <div class="container text-center text-muted small">
+      © <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> monancho · All rights reserved.
+    </div>
+  </footer>
+
+  <!-- 페이지 별 스크립트 삽입 -->
+  <th:block layout:fragment="script"></th:block>
+
+  <!-- Bootstrap JS: 로컬을 사용 중이면 th:src 유지, 아니면 CDN으로 대체 -->
+  <script type="text/javascript" th:src="@{/bootstrap.min.js}"></script>
+</body>
+</html>

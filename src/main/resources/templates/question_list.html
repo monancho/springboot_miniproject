@@ -1,0 +1,119 @@
+<html layout:decorate="~{layout}">
+	<div layout:fragment="content" class="container my-3">
+	<div class="row my-3">
+		<div class="row my-3 align-items-center">
+  <div class="col-12 col-md-6 mb-2 mb-md-0">
+    <a th:href="@{|/question/create?type=${type}|}" class="btn btn-primary">
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> 질문 등록하기
+    </a>
+  </div>
+
+  <div class="col-12 col-md-6">
+    <form id="searchInline" class="d-flex" onsubmit="return false;">
+      <label for="search_kw" class="visually-hidden">검색어</label>
+      <div class="input-group">
+        <input
+          type="search"
+          id="search_kw"
+          name="search_kw"
+          class="form-control"
+          placeholder="검색어를 입력하세요"
+          aria-label="검색어"
+          th:value="${kw}">
+        <button class="btn btn-outline-secondary" type="button" id="btn_search" aria-label="검색">
+          <i class="bi bi-search me-1" aria-hidden="true"></i> 찾기
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive shadow-sm rounded">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light small">
+      <tr class="text-center">
+        <th class="py-3" style="width:6%">번호</th>
+        <th class="py-3 text-start" style="width:56%">제목</th>
+        <th class="py-3" style="width:12%">글쓴이</th>
+        <th class="py-3" style="width:8%">조회수</th>
+        <th class="py-3" style="width:18%">작성일시</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="question, loop : ${paging}" class="text-center">
+        <td class="py-3" th:text="${paging.getTotalElements -(loop.count + (paging.number * paging.size))}"></td>
+        <td class="text-start py-3">
+        
+        <span th:if="${question.boardType != null and question.boardType.toString().equals('QA')}"
+      class="badge rounded-pill border bg-white text-secondary px-2 py-0 small">
+  		QA
+		</span>
+        
+        
+          <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}" class="text-decoration-none small"></a>
+          
+          <span class="text-primary small "
+		            		th:if="${#lists.size(question.answerList) > 0}"
+		            		th:text="'+'+${#lists.size(question.answerList)}"></span>
+          
+          <span class="text-danger small ms-2"
+		            		th:if="${#lists.size(question.answerList) > 0}"
+		            		th:text="'['+${#lists.size(question.commentList)}+']'"></span>
+        </td>
+        <td class="small py-3"><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+        <td class="small py-3"><span th:text="${question.hit}">0</span></td>
+        <td class="small py-3" th:text="${#temporals.format(question.createdate.plusHours(9), 'yyyy-MM-dd HH:mm')}">등록일</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+
+		<!-- 페이징 시작 -->
+		<div th:if="${!paging.isEmpty()}">
+			<ul class= "pagination justify-content-center">
+				<li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
+					<a class="page-link" href="javascript:void(0)" th:data-page="${paging.number-1}">
+					<span>이전</span>
+					</a>
+				</li>
+				<!-- 페이지 표시 1, 2, 3, 4, 5 시작 -->
+				<li th:each="page : ${#numbers.sequence(0, paging.totalPages-1)}"
+					th:if="${page >= paging.number-3 and page <= paging.number+3}"
+					th:classappend="${page == paging.number} ? 'active'" class="page-item">
+					 <a th:text="${page}" class="page-link" href="javascript:void(0)" th:data-page="${page}"></a>
+				</li>
+				<!-- 페이지 표시 1, 2, 3, 4, 5 끝 -->
+				<li class="oage-item" th:classappend="${!paging.hasNext} ? 'disabled'">
+				<a class="page-link" href="javascript:void(0)" th:data-page="${paging.number+1}">>
+					<span>다음</span>
+				</a>
+				</li>
+			</ul>
+		</div>
+		<!-- 페이징 끝 -->
+		<form th:action="@{/question/list}" method="get" id="searchForm">
+        <input type="hidden" id="kw" name="kw" th:value="${kw}">
+        <input type="hidden" id="page" name="page" th:value="${paging.number}">
+        <input type="hidden" id="type" name="type" th:value="${type}">
+    </form>
+		
+	</div>
+	<script layout:fragment="script" type='text/javascript'>
+const page_elements = document.getElementsByClassName("page-link");
+Array.from(page_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        document.getElementById('page').value = this.dataset.page;
+        document.getElementById('searchForm').submit();
+    });
+});
+const btn_search = document.getElementById("btn_search");
+btn_search.addEventListener('click', function() {
+    document.getElementById('kw').value = document.getElementById('search_kw').value;
+    document.getElementById('page').value = 0;  // 검색버튼을 클릭할 경우 0페이지부터 조회한다.
+    document.getElementById('searchForm').submit();
+});
+</script>
+</html>

@@ -1,0 +1,115 @@
+<html layout:decorate="~{layout}">
+  <!-- CONTENT -->
+  <div layout:fragment="content" class="container">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">
+            <span th:if="${board=='time'}">방문예약</span>
+            <span th:if="${board=='QA'}">질문게시판</span>
+            <span th:if="${board=='free'}">자유게시판</span>
+            <span th:if="${board == null or board.empty}">글쓰기</span>
+          </h5>
+          <a class="btn btn-sm btn-outline-secondary" th:href="@{/question/list}">
+            <i class="bi bi-arrow-left me-1"></i>목록으로
+          </a>
+        </div>
+
+        <!-- form: 서버에서 처리되는 action이 이미 있으면 th:action을 복원하세요 -->
+        <form th:object="${questionForm}" method="post" class="needs-validation" novalidate>
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+          <!-- 서버 유효성 에러 표시(기존 fragment 재사용) -->
+          <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+
+          <!-- 제목 -->
+          <div class="mb-3">
+            <label for="subject" class="form-label">제목 <span class="text-danger">*</span></label>
+            <input id="subject"
+                   type="text"
+                   th:field="*{subject}"
+                   class="form-control"
+                   placeholder="제목을 입력하세요"
+                   required>
+            <div class="invalid-feedback">제목을 입력해 주세요.</div>
+          </div>
+
+          <!-- 게시판 선택 -->
+          <div class="mb-3">
+            <label for="boardType" class="form-label">게시판</label>
+            <select id="boardType"
+                    name="boardType"
+                    class="form-select"
+                    th:disabled="${board != null and !board.empty}">
+              <option value="free" th:selected="${board == 'free'}">자유게시판</option>
+              <option value="QA" th:selected="${board =='QA'}">질문게시판</option>
+              <option value="time" th:selected="${board =='time'}" th:if="${board=='time'}">예약등록</option>
+            </select>
+
+            <!-- 서버에 실제로 전송되도록 하는 hidden (원본 로직 유지) -->
+            <input th:if="${board == 'free'}" type="hidden" name="boardType" value="free">
+            <input th:if="${board == 'QA'}" type="hidden" name="boardType" value="QA">
+            <input th:if="${board == 'time'}" type="hidden" name="boardType" value="time">
+          </div>
+
+          <!-- 예약일(조건부) -->
+          <div class="mb-3" th:if="${board=='time'}">
+            <label for="date" class="form-label">예약일 <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+              <input id="date" type="datetime-local" name="date" class="form-control" required>
+              <div class="invalid-feedback">예약일을 선택해주세요.</div>
+            </div>
+          </div>
+
+          <!-- 내용 -->
+          <div class="mb-3">
+            <label for="content" class="form-label">내용 <span class="text-danger">*</span></label>
+            <textarea id="content"
+                      th:field="*{content}"
+                      class="form-control"
+                      rows="10"
+                      placeholder="내용을 입력하세요"
+                      required></textarea>
+            <div class="invalid-feedback">내용을 입력해 주세요.</div>
+            <div class="form-text">Markdown 또는 간단한 서식이 가능하면 편리합니다.</div>
+          </div>
+
+          <!-- 파일 업로드 (선택) 예시: 필요 없으면 지우세요 -->
+          <!--
+          <div class="mb-3">
+            <label for="attach" class="form-label">첨부파일 (선택)</label>
+            <input id="attach" class="form-control" type="file" name="file">
+          </div>
+          -->
+
+          <!-- 버튼 -->
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i> 저장하기
+            </button>
+            <a th:href="@{/question/list}" class="btn btn-outline-secondary">취소</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT fragment: Bootstrap client-side validation 활성화 -->
+  <script layout:fragment="script" type="text/javascript">
+    (function () {
+      'use strict';
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          // HTML5 validation 체크
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
+  </script>
+</html>
