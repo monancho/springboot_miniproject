@@ -80,13 +80,12 @@ public class UserController {
 	}
 	@PostMapping("edit")
 	public String userEdit( UserCreateForm createForm, Principal principal, BindingResult bindingResult, Model model) {
-		System.out.println("입력 비밀번호" + createForm.getPassword1());
 		SiteUser siteUser = userService.getUser(principal.getName());
 		model.addAttribute("email",createForm.getEmail());
-		if(siteUser == null) {
-			return "redirect:/user/login";}
 		if(bindingResult.hasErrors()) {
 			return "user_update";}
+		if(siteUser == null) {
+			return "redirect:/user/login";}
 		//TODO 비밀번호 확인은 나중에 시큐어리티 더 공부후 구현
 		try {
 			userService.userUpdate(siteUser, createForm);
@@ -94,7 +93,7 @@ public class UserController {
 			// TODO: handle exception
 			e.printStackTrace();
 			bindingResult.reject("passwordFailed", "비밀번호가 틀렸습니다");
-			
+			model.addAttribute("error", "비밀번호가 틀렸습니다");
 			return "user_update";
 			
 		}

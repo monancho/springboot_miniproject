@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'war'
 }
 
 group = 'com.monancho'
@@ -14,6 +15,11 @@ java {
 	}
 }
 
+bootWar { //war 배포파일명
+	archiveBaseName = "monanchoboard"
+	archiveFileName = "monanchoboard.war"
+	archiveVersion = "0.0.0"
+}
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor

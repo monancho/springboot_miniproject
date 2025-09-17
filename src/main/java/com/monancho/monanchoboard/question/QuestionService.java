@@ -119,6 +119,46 @@ public class QuestionService {
 		return pagingList;
 		
 	}
+	public Page<Question> getTimePageQuestions(int page, String kw, String boardType, Long id) {
+		
+		int size = 10;
+		
+		int startRow = page * size;
+		int endRow = startRow +size;
+		
+		List<Question> pageQuestionList;
+		int totalSearchQuestion;
+		// 검색어 없이 리스트 조회
+		
+		
+		pageQuestionList = questionRepository.searchFindTimeQuestionsWithPaging(kw ,startRow, endRow, boardType, id);
+		totalSearchQuestion = questionRepository.countTimeSearchResult(kw,boardType, id);
+		
+		Page<Question> pagingList = new PageImpl<>(pageQuestionList, PageRequest.of(page, size), totalSearchQuestion);
+		
+		return pagingList;
+		
+	}
+	public Page<Question> getSelfPageQuestions(int page, String kw, Long id) {
+		
+		int size = 10;
+		
+		int startRow = page * size;
+		int endRow = startRow +size;
+		
+		List<Question> pageQuestionList;
+		int totalSearchQuestion;
+		// 검색어 없이 리스트 조회
+		
+		
+		pageQuestionList = questionRepository.searchFindSelfQuestionsWithPaging(kw ,startRow, endRow, "", id);
+		totalSearchQuestion = questionRepository.countSelfSearchResult(kw, "", id);
+		
+		Page<Question> pagingList = new PageImpl<>(pageQuestionList, PageRequest.of(page, size), totalSearchQuestion);
+		
+		return pagingList;
+		
+	}
 	
 //	private Specification<Question> search(String kw) {
 //		

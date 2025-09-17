@@ -1,32 +1,8 @@
 <html layout:decorate="~{layout}">
 	<div layout:fragment="content" class="container my-3">
 	<div class="row my-3">
-		<div class="row my-3 align-items-center">
-  <div class="col-12 col-md-6 mb-2 mb-md-0" >
-    <a th:href="@{|/question/create?type=${type}|}" class="btn btn-primary" >
-      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> 질문 등록하기
-    </a>
-  </div>
+		<h1 class="h5 d-inline">작성 글</h1>
 
-  <div class="col-12 col-md-6">
-    <form id="searchInline" class="d-flex" onsubmit="return false;">
-      <label for="search_kw" class="visually-hidden">검색어</label>
-      <div class="input-group">
-        <input
-          type="search"
-          id="search_kw"
-          name="search_kw"
-          class="form-control"
-          placeholder="검색어를 입력하세요"
-          aria-label="검색어"
-          th:value="${kw}">
-        <button class="btn btn-outline-secondary" type="button" id="btn_search" aria-label="검색">
-          <i class="bi bi-search me-1" aria-hidden="true"></i> 찾기
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
 
 <div class="table-responsive shadow-sm rounded">
   <table class="table table-hover align-middle mb-0">
@@ -50,18 +26,15 @@
 		</span>
         
         
-	        	<a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}" class="text-decoration-none small"></a>
-	        	
-	          <span th:if="${#lists.size(question.answerList) > 0 and question.boardType == 'QA'}" class="small text-muted">
-				  <small class="text-primary fw-semibold" th:text="${#lists.size(question.answerList)}"></small><small>개의 답변이 있습니다</small>
-				</span>
-				
-	          	<span class="text-danger small ms-2"
-	        		th:if="${#lists.size(question.commentList) > 0}"
-	        		th:text="'['+${#lists.size(question.commentList)}+']'">
-	       		</span>
-
+          <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}" class="text-decoration-none small"></a>
           
+          <span class="text-primary small "
+		            		th:if="${#lists.size(question.answerList) > 0}"
+		            		th:text="'+'+${#lists.size(question.answerList)}"></span>
+          
+          <span class="text-danger small ms-2"
+		            		th:if="${#lists.size(question.answerList) > 0}"
+		            		th:text="'['+${#lists.size(question.commentList)}+']'"></span>
         </td>
         <td class="small py-3"><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
         <td class="small py-3"><span th:text="${question.hit}">0</span></td>

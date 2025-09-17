@@ -74,6 +74,96 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
 				@Param("kw") String kw,
 				@Param("boardType") String boardType);
 	
+	
+	
+	
+	@Query(value = 
+			"SELECT * FROM ( " +
+					"   SELECT q.*, ROWNUM rnum FROM ( " +
+					"       SELECT DISTINCT q.* " +
+					"       FROM question q " +
+					"       LEFT OUTER JOIN siteuser u1 ON q.author_id = u1.id " +
+					"       LEFT OUTER JOIN answer a ON a.question_id = q.id " +
+					"       LEFT OUTER JOIN siteuser u2 ON a.author_id = u2.id " +
+					"       WHERE (q.subject LIKE		'%' || :kw || '%' " +
+					"          OR q.content LIKE		'%' || :kw || '%' " +
+					"          OR u1.username LIKE	'%' || :kw || '%' " +
+					"          OR a.content LIKE 	'%' || :kw || '%' " +
+					"          OR u2.username LIKE 	'%' || :kw || '%' )" +
+					"          AND q.board_type LIKE	'%' || :boardType || '%'" + // 하나의 쿼리로, 카테고리 별, 전체 보드 검색 가능하게 LIKE문 사용
+					"			AND q.AUTHOR_ID = :id"+
+					"       ORDER BY q.createdate DESC " +
+					"   ) q WHERE ROWNUM <= :endRow " +
+					") WHERE rnum > :startRow", 
+					nativeQuery = true)
+	List<Question> searchFindTimeQuestionsWithPaging(
+			@Param("kw") String kw ,@Param("startRow") int startRow, @Param("endRow")int endRow,
+			@Param("boardType") String boardType, @Param("id") Long id);
+	@Query(value =   
+			"       SELECT COUNT(DISTINCT q.id) " +
+					"       FROM question q " +
+					"       LEFT OUTER JOIN siteuser u1 ON q.author_id = u1.id " +
+					"       LEFT OUTER JOIN answer a ON a.question_id = q.id " +
+					"       LEFT OUTER JOIN siteuser u2 ON a.author_id = u2.id " +
+					"       WHERE (q.subject LIKE		'%' || :kw || '%' " +
+					"          OR q.content LIKE		'%' || :kw || '%' " +
+					"          OR u1.username LIKE	'%' || :kw || '%' " +
+					"          OR a.content LIKE 	'%' || :kw || '%' " +
+					"          OR u2.username LIKE 	'%' || :kw || '%' )" +
+					"          AND q.board_type LIKE	'%' || :boardType || '%'"+    // 하나의 쿼리로, 카테고리 별, 전체 보드 검색 가능하게 LIKE문 사용   
+					"			AND q.AUTHOR_ID = :id",
+					nativeQuery = true)
+	public int countTimeSearchResult(
+			@Param("kw") String kw,
+			@Param("boardType") String boardType,
+			@Param("id") Long id);
+	
+	
+	
+	
+	@Query(value = 
+			"SELECT * FROM ( " +
+					"   SELECT q.*, ROWNUM rnum FROM ( " +
+					"       SELECT DISTINCT q.* " +
+					"       FROM question q " +
+					"       LEFT OUTER JOIN siteuser u1 ON q.author_id = u1.id " +
+					"       LEFT OUTER JOIN answer a ON a.question_id = q.id " +
+					"       LEFT OUTER JOIN siteuser u2 ON a.author_id = u2.id " +
+					"       WHERE (q.subject LIKE		'%' || :kw || '%' " +
+					"          OR q.content LIKE		'%' || :kw || '%' " +
+					"          OR u1.username LIKE	'%' || :kw || '%' " +
+					"          OR a.content LIKE 	'%' || :kw || '%' " +
+					"          OR u2.username LIKE 	'%' || :kw || '%' )" +
+					"          AND q.board_type LIKE	'%' || :boardType || '%'" + // 하나의 쿼리로, 카테고리 별, 전체 보드 검색 가능하게 LIKE문 사용
+					"			AND q.AUTHOR_ID = :id"+
+					"			AND q.board_type <> 'time'"+
+					"       ORDER BY q.createdate DESC " +
+					"   ) q WHERE ROWNUM <= :endRow " +
+					") WHERE rnum > :startRow", 
+					nativeQuery = true)
+	List<Question> searchFindSelfQuestionsWithPaging(
+			@Param("kw") String kw ,@Param("startRow") int startRow, @Param("endRow")int endRow,
+			@Param("boardType") String boardType, @Param("id") Long id);
+	@Query(value =   
+			"       SELECT COUNT(DISTINCT q.id) " +
+					"       FROM question q " +
+					"       LEFT OUTER JOIN siteuser u1 ON q.author_id = u1.id " +
+					"       LEFT OUTER JOIN answer a ON a.question_id = q.id " +
+					"       LEFT OUTER JOIN siteuser u2 ON a.author_id = u2.id " +
+					"       WHERE (q.subject LIKE		'%' || :kw || '%' " +
+					"          OR q.content LIKE		'%' || :kw || '%' " +
+					"          OR u1.username LIKE	'%' || :kw || '%' " +
+					"          OR a.content LIKE 	'%' || :kw || '%' " +
+					"          OR u2.username LIKE 	'%' || :kw || '%' )" +
+					"          AND q.board_type LIKE	'%' || :boardType || '%'"+    // 하나의 쿼리로, 카테고리 별, 전체 보드 검색 가능하게 LIKE문 사용   
+					"			AND q.AUTHOR_ID = :id" +
+					"			AND q.board_type <> 'time'",
+					nativeQuery = true)
+	public int countSelfSearchResult(
+			@Param("kw") String kw,
+			@Param("boardType") String boardType,
+			@Param("id") Long id);
+	
 //	List<Question> findQuestionsWithPaging(@Param("startRow") int startRow,
 //			@Param("endRow") int endRow);
 }

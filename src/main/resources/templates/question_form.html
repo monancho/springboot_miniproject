@@ -57,7 +57,7 @@
             <label for="date" class="form-label">예약일 <span class="text-danger">*</span></label>
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-              <input id="date" type="datetime-local" name="date" class="form-control" required>
+              <input id="date" type="datetime-local" name="date" class="form-control"  th:value="*{date}" required>
               <div class="invalid-feedback">예약일을 선택해주세요.</div>
             </div>
           </div>

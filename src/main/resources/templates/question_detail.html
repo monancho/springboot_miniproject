@@ -58,7 +58,7 @@
           </a>
 
           <!-- 수정 -->
-          <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary d-flex align-items-center"
+          <a th:href="@{|/question/modify/${question.id}?type=${question.boardType}|}" class="btn btn-sm btn-outline-secondary d-flex align-items-center"
              sec:authorize="isAuthenticated()" th:if="${question.author != null and question.author.username == #authentication.getPrincipal().getUsername()}"
              aria-label="수정">
             <i class="bi bi-pencil"></i>
@@ -77,6 +77,11 @@
       </div>
     </div>
   </div>
+
+
+<div th:if="${question.boardType == 'QA'}">
+
+
 
   <!-- 답변 헤더 -->
   <h5 class="mt-4 mb-3"><span th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다|">답변 갯수</span></h5>
@@ -149,14 +154,14 @@
   <div th:replace="~{form_errors :: formErrorsFragment}"></div>
 
   <!-- 익명: disabled, name 생성하지 않음 -->
-  <textarea th:if="${#authentication == null or #authentication.principal == null}"
+  <textarea sec:authorize="isAnonymous()"
             class="form-control mb-2"
             rows="5"
             placeholder="로그인 후 답변하실 수 있습니다."
             disabled></textarea>
 
   <!-- 인증된 사용자만 전송 가능한 단일 textarea -->
-  <textarea th:unless="${#authentication == null or #authentication.principal == null}"
+  <textarea sec:authorize="isAuthenticated()"
             th:field="*{content}"
             class="form-control mb-2"
             rows="5"
@@ -172,7 +177,7 @@
   </div>
 </form>
 
-
+</div>
   <!-- 댓글 헤더 -->
   <h5 class="mt-4 mb-3"><span th:text="|${#lists.size(question.commentList)}개의 댓글이 있습니다|">댓글 갯수</span></h5>
 
@@ -213,14 +218,14 @@
   <div th:replace="~{form_errors :: formErrorsFragment}"></div>
 
   <!-- 익명 사용자: disabled, th:field 제거 (name 생성 방지) -->
-  <textarea th:if="${#authentication == null or #authentication.principal == null}"
+  <textarea sec:authorize="isAnonymous()"
             class="form-control mb-2"
             rows="4"
             placeholder="로그인 후 댓글을 남길 수 있습니다."
             disabled></textarea>
 
   <!-- 인증 사용자: 실제 전송 필드 (단 한 개만 렌더) -->
-  <textarea th:unless="${#authentication == null or #authentication.principal == null}"
+  <textarea sec:authorize="isAuthenticated()"
             th:field="*{content}"
             class="form-control mb-2"
             rows="4"

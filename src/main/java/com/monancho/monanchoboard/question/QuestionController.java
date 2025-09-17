@@ -68,22 +68,49 @@ public class QuestionController {
 	public String list(Model model, 
 			@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "kw", defaultValue = "") String kw, 
-			@RequestParam(value = "type", defaultValue = "") String boardType) {
-//		List<Question> questionList = questionRepository.findAll();
-		Page<Question> paging = questionService.getPageQuestions(page, kw, boardType);
+			@RequestParam(value = "type", defaultValue = "") String boardType,
+			Principal principal) {
 		
-		model.addAttribute("paging", paging);
+		Page<Question> paging;
+		SiteUser siteUser;
+	
+		
+//		List<Question> questionList = questionRepository.findAll();
+		
 		model.addAttribute("kw", kw);
 		model.addAttribute("type",boardType);
-		return "question_list";
+		
+		if(boardType.equals("time") && principal != null) {
+			siteUser = userService.getUser(principal.getName());
+			paging = questionService.getTimePageQuestions(page, kw, boardType, siteUser.getId());
+			model.addAttribute("paging", paging);
+			return "question_list2";
+		}	else if (boardType.equals("self") && principal != null){
+			siteUser = userService.getUser(principal.getName());
+			paging = questionService.getSelfPageQuestions(page, kw, siteUser.getId());
+			model.addAttribute("paging", paging);
+			return "question_list3";
+		}
+		else {
+			paging = questionService.getPageQuestions(page, kw, boardType);
+			model.addAttribute("paging", paging);
+			return "question_list";
+		}
+		
 	}
+	
 	@GetMapping(value="/detail/{id}")
 	public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm, CommentForm commentForm) {
 		questionService.hit(questionService.getQuestion(id));
 		
 		Question question = questionService.getQuestion(id);
+		
+		if(question.getBoardType().equals("time")) {
+			model.addAttribute("question", question);
+			return "question_detail2";
+		} else {
 		model.addAttribute("question", question);
-		return "question_detail";
+		return "question_detail";}
 	}
 	
 //	@GetMapping("/create/") //질문 등록 폼만 매핑해주는 메서드 => GET
@@ -92,8 +119,11 @@ public class QuestionController {
 //		return "question_form";
 //	}
 	@GetMapping("/create") //질문 등록 폼만 매핑해주는 메서드 => GET
-	public String questionCreate(Model model,QuestionForm questionForm,@RequestParam(value = "type", defaultValue = "") String boardType) {
+	public String questionCreate(Model model,QuestionForm questionForm,@RequestParam(value = "type", defaultValue = "") String boardType, Principal principal) {
 		//if(boardType.isEmpty()) return "redirect:question/create"; // 보드 타입 없을떄
+		if(principal == null) {
+			return "redirect:/user/login";
+		}
 		model.addAttribute("board",boardType);
 		return "question_form";
 	}
@@ -123,14 +153,17 @@ public class QuestionController {
 	
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/modify/{id}")
-	public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {
+	public String questionModify(Model model, QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal, @RequestParam(value = "type", defaultValue = "") String boardType) {
 		Question question = questionService.getQuestion(id);
 		
 		if(!question.getAuthor().getUsername().equals(principal.getName())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수정 권한이 없습니다.");
 		}
+		
 		questionForm.setSubject(question.getSubject());
 		questionForm.setContent(question.getContent());
+		questionForm.setDate(question.getModifyDate());
+		model.addAttribute("board",boardType);
 		return "question_form";
 	}
 	@PreAuthorize("isAuthenticated()")
